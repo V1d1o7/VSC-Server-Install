@@ -68,7 +68,7 @@ cat <<EOF > /etc/systemd/system/vsc-server.service
 [Unit]
 Description=Visual Studio Code Server
 After=network.target
-
+ 
 [Service]
 User=vscode
 ExecStart=/opt/vsc-server/code tunnel
