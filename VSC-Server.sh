@@ -47,7 +47,7 @@ HOSTNAME=$(hostname)
 echo -e "\033[33mStarting code tunnel service installation as vscode user...\033[0m"
 
 # Run the code tunnel command with disabled buffering and capture the output line by line
-stdbuf -o0 sudo -u vscode -i /opt/vsc-server/code tunnel user login --provider GitHub --name "$HOSTNAME" | while read -r line; do
+stdbuf -o0 sudo -u vscode -i /opt/vsc-server/code tunnel user login --provider github --name "$HOSTNAME" | while read -r line; do
   echo "$line"
   
   # Check for the URL in the output
