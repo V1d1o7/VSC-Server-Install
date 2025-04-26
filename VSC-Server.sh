@@ -46,28 +46,32 @@ HOSTNAME=$(hostname)
 
 echo -e "\033[33mStarting code tunnel service installation as vscode user...\033[0m"
 
-# Run the installation as vscode user and allow interaction via CLI
-# Start the code tunnel in the background
-sudo -u vscode -i sh -c 'stdbuf -o0 /opt/vsc-server/code tunnel --name $HOSTNAME' &
+# Start the code tunnel process in the background
+sudo -u vscode -i /opt/vsc-server/code tunnel --name "$HOSTNAME" &
 
-# Get the process ID of the background tunnel process
-TUNNEL_PID=$!
+# Capture the process ID of the background command
+CODE_TUNNEL_PID=$!
 
 # Monitor the output for the URL
-while read line; do
-  echo "$line"
+while true; do
+  # Read the output from the background process
+  OUTPUT=$(tail -n 10 /opt/vsc-server/code_tunnel_output.log)
   
-  # Check for the URL in the output
-  if [[ "$line" =~ "Open this link in your browser https://vscode.dev/tunnel/$HOSTNAME" ]]; then
-    # Once URL is detected, terminate the code tunnel process and proceed
-    echo -e "\033[32mTerminating code tunnel process to proceed...\033[0m"
-    kill $TUNNEL_PID
+  # If the URL is detected, kill the process
+  if [[ "$OUTPUT" =~ "Open this link in your browser https://vscode.dev/tunnel/$HOSTNAME" ]]; then
+    echo -e "\033[32mURL detected: https://vscode.dev/tunnel/$HOSTNAME\033[0m"
     
+    # Kill the code tunnel process after detecting the URL
+    kill $CODE_TUNNEL_PID
     break
   fi
-done < <(wait $TUNNEL_PID)
+  sleep 1
+done
 
-echo -e "\033[33mSetting up systemd file...\033[0m"
+# Continue with systemd service setup after killing the process
+echo -e "\033[33mSetting up systemd service...\033[0m"
+
+# Set up the systemd service for the VSC server
 cat <<EOF > /etc/systemd/system/vsc-server.service
 [Unit]
 Description=Visual Studio Code Server
