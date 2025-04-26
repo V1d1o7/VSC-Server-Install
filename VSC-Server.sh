@@ -20,9 +20,6 @@ if ! id "vscode" &>/dev/null; then
   echo "vscode:$PASSWORD" | chpasswd
 fi
 
-echo -e "\033[33mInstalling pre-reqs...\033[0m"
-apt install -y dbus-user-session dbus-x11
-
 echo -e "\033[33mChanging to directory /opt...\033[0m"
 cd /opt
 
