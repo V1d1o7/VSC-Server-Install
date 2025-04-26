@@ -46,21 +46,19 @@ HOSTNAME=$(hostname)
 
 echo -e "\033[33mStarting code tunnel service installation as vscode user...\033[0m"
 
-# Run the code tunnel command with disabled buffering and capture the output line by line
-stdbuf -o0 sudo -u vscode -i /opt/vsc-server/code tunnel --name "$HOSTNAME" user login --provider github | while read -r line; do
-  echo "$line"
-  
-  # Check for the URL in the output
-  if [[ "$line" =~ "Open this link in your browser https://vscode.dev/tunnel/$HOSTNAME" ]]; then
-    echo -e "\033[32mURL detected: https://vscode.dev/tunnel/$HOSTNAME\033[0m"
-    
-    # Kill the code tunnel process once the URL is detected
-    pkill -f "/opt/vsc-server/code tunnel"
-    break
-  fi
-done
+# Run the code tunnel command and capture the output to display
+OUTPUT=$(sudo -u vscode -i /opt/vsc-server/code tunnel --name "$HOSTNAME" user login --provider github)
 
-# Continue with systemd service setup after killing the process
+# Display the output
+echo -e "\033[33mOutput from the code tunnel command:\033[0m"
+echo "$OUTPUT"
+
+# Look for the URL or login code in the output (optional)
+if [[ "$OUTPUT" =~ "https://vscode.dev/tunnel/$HOSTNAME" ]]; then
+  echo -e "\033[32mURL detected: https://vscode.dev/tunnel/$HOSTNAME\033[0m"
+fi
+
+# Continue with systemd service setup
 echo -e "\033[33mSetting up systemd service...\033[0m"
 
 # Set up the systemd service for the VSC server
