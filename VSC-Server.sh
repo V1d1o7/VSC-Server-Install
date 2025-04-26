@@ -45,28 +45,26 @@ export HOME=/home/vscode
 HOSTNAME=$(hostname)
 
 echo -e "\033[33mStarting code tunnel service installation as vscode user...\033[0m"
+# Run the installation as vscode user and allow interaction via CLI
+sudo -u vscode -i sh -c 'stdbuf -o0 /opt/vsc-server/code tunnel --name $HOSTNAME' user login --provider github | while read line; do
+  echo "$line"
+  
+  # Check for the URL in the output
+  if [[ "$line" =~ "Open this link in your browser https://vscode.dev/tunnel/$HOSTNAME" ]]; then
+    # Once URL is detected, terminate the process
+    echo -e "\033[32mTerminating code tunnel process to proceed...\033[0m"
+    pkill -f "/opt/vsc-server/code tunnel"
+    
+    break
+  fi
+done
 
-# Run the code tunnel command and capture the output to display
-OUTPUT=$(sudo -u vscode -i /opt/vsc-server/code tunnel --name "$HOSTNAME" user login --provider github)
-
-# Display the output
-echo -e "\033[33mOutput from the code tunnel command:\033[0m"
-echo "$OUTPUT"
-
-# Look for the URL or login code in the output (optional)
-if [[ "$OUTPUT" =~ "https://vscode.dev/tunnel/$HOSTNAME" ]]; then
-  echo -e "\033[32mURL detected: https://vscode.dev/tunnel/$HOSTNAME\033[0m"
-fi
-
-# Continue with systemd service setup
-echo -e "\033[33mSetting up systemd service...\033[0m"
-
-# Set up the systemd service for the VSC server
+echo -e "\033[33mSetting up systemd file...\033[0m"
 cat <<EOF > /etc/systemd/system/vsc-server.service
 [Unit]
 Description=Visual Studio Code Server
 After=network.target
- 
+
 [Service]
 User=vscode
 ExecStart=/opt/vsc-server/code tunnel
