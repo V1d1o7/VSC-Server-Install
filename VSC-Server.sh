@@ -20,9 +20,6 @@ if ! id "vscode" &>/dev/null; then
   echo "vscode:$PASSWORD" | chpasswd
 fi
 
-echo -e "\033[33mInstalling pre-reqs...\033[0m"
-apt install -y dbus-user-session dbus-x11
-
 echo -e "\033[33mChanging to directory /opt...\033[0m"
 cd /opt
 
@@ -46,7 +43,7 @@ HOSTNAME=$(hostname)
 
 echo -e "\033[33mStarting code tunnel service installation as vscode user...\033[0m"
 # Run the installation as vscode user and allow interaction via CLI
-sudo -u vscode -i sh -c 'stdbuf -o0 /opt/vsc-server/code tunnel --name $HOSTNAME' | while read line; do
+sudo -u vscode -i sh -c 'stdbuf -o0 /opt/vsc-server/code tunnel --name $HOSTNAME' user login --provider github | while read line; do
   echo "$line"
   
   # Check for the URL in the output
